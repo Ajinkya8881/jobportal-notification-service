@@ -56,7 +56,7 @@ public class NotificationService {
     public void markAsRead(Long id){
 
         Notification notification = notificationRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Notification not found"));
+                .orElseThrow(()-> new IllegalArgumentException("Notification not found"));
 
         notification.setRead(true);
 
