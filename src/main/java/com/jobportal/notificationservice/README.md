@@ -1,35 +1,36 @@
-📬 Notification Service
+# Notification Service
 
 Kafka-based microservice that consumes application events from the Job Portal main application and persists notifications into a dedicated MySQL database.
 
-🚀 Tech Stack
+---
 
-Java 17
+## Tech Stack
 
-Spring Boot 3.5.x
+- Java 17
+- Spring Boot 3.5.x
+- Spring Data JPA
+- Apache Kafka
+- MySQL 8
+- Lombok
 
-Spring Data JPA
+---
 
-Apache Kafka
+## Architecture
 
-MySQL 8
+Job Portal (Main Application)  
+&nbsp;&nbsp;&nbsp;&nbsp;↓  
+Kafka Topic: `application-events`  
+&nbsp;&nbsp;&nbsp;&nbsp;↓  
+Notification Service  
+&nbsp;&nbsp;&nbsp;&nbsp;↓  
+MySQL (`notification_db`)
 
-Lombok
+---
 
-🏗 Architecture
-Job Portal (Main App)
-│
-▼
-Kafka Topic: application-events
-│
-▼
-Notification Service
-│
-▼
-MySQL (notification_db)
+## Configuration
 
-⚙️ Configuration
-application.properties
+### application.properties
+
 spring.application.name=notification-service
 
 server.port=8081
@@ -51,83 +52,72 @@ spring.kafka.consumer.properties.spring.json.trusted.packages=*
 spring.kafka.consumer.properties.spring.json.use.type.headers=false
 spring.kafka.consumer.properties.spring.json.value.default.type=com.jobportal.notificationservice.event.ApplicationEvent
 
-🗄 Database Setup
-CREATE DATABASE notification_db;
 
-▶ Running the Service
+---
+
+## Database Setup
+
+```sql
+CREATE DATABASE notification_db;
+Running the Service
 mvn clean install
 mvn spring-boot:run
-
-
 Service runs at:
 
 http://localhost:8081
-
-🧪 End-to-End Testing
-1️⃣ Trigger Event (From Main Application)
-
-Apply to a job via main app:
+End-to-End Testing
+1. Trigger Event (From Main Application)
+Apply to a job using the main application:
 
 POST http://localhost:8080/applications/{jobId}
 Authorization: Bearer <USER_TOKEN>
+This publishes an event to Kafka.
 
-2️⃣ Verify Notification in Database
+2. Verify Notification in Database
 USE notification_db;
 SELECT * FROM notification;
-
-3️⃣ Fetch Notifications
+3. Fetch Notifications
 GET http://localhost:8081/notifications
+Example response:
 
-Response
 [
-{
-"id": 1,
-"jobId": 1,
-"applicantId": 2,
-"employerId": 1,
-"eventType": "APPLICATION_SUBMITTED",
-"status": null,
-"createdAt": "2026-02-17T14:35:36.333736",
-"read": false
-}
+  {
+    "id": 1,
+    "jobId": 1,
+    "applicantId": 2,
+    "employerId": 1,
+    "eventType": "APPLICATION_SUBMITTED",
+    "status": null,
+    "createdAt": "2026-02-17T14:35:36.333736",
+    "read": false
+  }
 ]
-
-4️⃣ Mark Notification as Read
+4. Mark Notification as Read
 PATCH http://localhost:8081/notifications/{id}/read
-
-
 Example:
 
 PATCH http://localhost:8081/notifications/1/read
-
-📂 Project Structure
+Project Structure
 controller/
 service/
 repository/
 entity/
 dto/
 event/
+Features
+Kafka Consumer using @KafkaListener
 
-📦 Features
+Event-to-Entity mapping
 
-Kafka Consumer (@KafkaListener)
+MySQL persistence
 
-Event-to-Entity Mapping
+DTO-based API responses
 
-MySQL Persistence
-
-DTO-based Response
-
-Mark-as-read Endpoint
+Mark-as-read endpoint
 
 Production-ready JPA configuration
 
-🔗 Kafka Topic
+Kafka Topic
 application-events
-
-🛠 Build
+Build
 mvn clean package
-
-📌 Author
-
-Ajinkya Kolhe
